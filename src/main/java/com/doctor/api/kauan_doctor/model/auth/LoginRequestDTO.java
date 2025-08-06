@@ -1,4 +1,4 @@
-package com.doctor.api.kauan_doctor.model.login;
+package com.doctor.api.kauan_doctor.model.auth;
 
 public record LoginRequestDTO(
         String email,
