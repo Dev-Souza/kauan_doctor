@@ -1,6 +1,7 @@
 package com.doctor.api.kauan_doctor.model.paciente;
 
 import com.doctor.api.kauan_doctor.model.consulta.ConsultaModel;
+import com.doctor.api.kauan_doctor.model.utils.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,7 +21,7 @@ public class PacienteModel {
     private String nome;
     private String email;
     private String senha;
-    private String role;
+    private Role role = Role.ROLE_PACIENTE;
 
     // Relacionamento com consulta
     @OneToMany(mappedBy = "paciente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
