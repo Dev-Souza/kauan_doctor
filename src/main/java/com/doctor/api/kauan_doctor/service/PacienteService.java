@@ -28,6 +28,7 @@ public class PacienteService {
     // Conversor Entity to DTO
     private PacienteResponseDTO entityToDto(PacienteModel pacienteModel){
         return new PacienteResponseDTO(
+                pacienteModel.getId(),
                 pacienteModel.getNome(),
                 pacienteModel.getEmail(),
                 pacienteModel.getRole()
