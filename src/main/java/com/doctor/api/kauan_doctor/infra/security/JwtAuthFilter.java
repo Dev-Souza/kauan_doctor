@@ -24,14 +24,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-
+    protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         String path = request.getRequestURI();
         String method = request.getMethod();
 
-        // Rotas públicas que não precisam de token
-        if ((path.equals("/medicos") && method.equals("POST")) ||
+        return (path.equals("/medicos") && method.equals("POST")) ||
                 (path.equals("/pacientes") && method.equals("POST")) ||
                 (path.equals("/auth/login") && method.equals("POST")) ||
                 path.startsWith("/swagger-ui") ||
@@ -39,12 +36,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                 path.startsWith("/swagger-resources") ||
                 path.startsWith("/v3/api-docs") ||
                 path.startsWith("/webjars") ||
-                path.equals("/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+                path.equals("/");
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
         String authHeader = request.getHeader("Authorization");
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
