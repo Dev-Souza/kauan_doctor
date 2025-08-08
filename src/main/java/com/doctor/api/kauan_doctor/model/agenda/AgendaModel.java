@@ -16,13 +16,16 @@ public class AgendaModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate dataAgenda;
-    private LocalTime horaAgenda;
-    private boolean disponivel = true;
-    @Enumerated(EnumType.STRING)
-    private StatusAgendaEnum statusAgenda;
 
-    // Relacionamento com médico
+    private LocalDate data; // Data do atendimento
+    private LocalTime horaInicio; // Horário inicial
+    private LocalTime horaFim; // Horário final (opcional)
+
+    private boolean disponivel = true;
+
+    @Enumerated(EnumType.STRING)
+    private StatusAgendaEnum statusAgenda; // LIVRE, RESERVADA, CANCELADA...
+
     @ManyToOne
     @JoinColumn(name = "medico_id", nullable = false)
     private MedicoModel medico;
