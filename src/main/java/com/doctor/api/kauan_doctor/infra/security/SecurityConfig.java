@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -19,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     private final JwtService jwtService;
@@ -56,6 +58,8 @@ public class SecurityConfig {
                         // Libera a criação de médicos e pacientes (cadastro)
                         .requestMatchers(HttpMethod.POST, "/medicos").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pacientes").permitAll()
+                        //Somente médico pode criar uma agenda para ele
+                        .requestMatchers(HttpMethod.POST, "/agendas").hasRole("MEDICO")
                         // Exige autenticação para qualquer outra requisição
                         .anyRequest().authenticated()
                 )
