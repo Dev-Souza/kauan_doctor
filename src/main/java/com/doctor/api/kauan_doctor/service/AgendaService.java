@@ -4,7 +4,6 @@ import com.doctor.api.kauan_doctor.model.agenda.AgendaModel;
 import com.doctor.api.kauan_doctor.model.agenda.AgendaRequestDTO;
 import com.doctor.api.kauan_doctor.model.agenda.AgendaResponseDTO;
 import com.doctor.api.kauan_doctor.model.medico.MedicoModel;
-import com.doctor.api.kauan_doctor.model.medico.MedicoResponseDTO;
 import com.doctor.api.kauan_doctor.repository.AgendaRepository;
 import com.doctor.api.kauan_doctor.repository.MedicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +37,7 @@ public class AgendaService {
 
     // Conversor: Entity to DTO
     private AgendaResponseDTO entityToDto(AgendaModel agenda) {
+        Long medicoId = (agenda.getMedico() != null) ? agenda.getMedico().getId() : null;
         return new AgendaResponseDTO(
                 agenda.getId(),
                 agenda.getData(),
@@ -45,30 +45,23 @@ public class AgendaService {
                 agenda.getHoraFim(),
                 agenda.isDisponivel(),
                 agenda.getStatusAgenda(),
-                // GET id do medico
-                agenda.getMedico().getId()
+                medicoId
         );
     }
 
     // CREATE AGENDA
     public ResponseEntity<AgendaResponseDTO> createAgenda(AgendaRequestDTO dto) {
-        //GET Medico
         Optional<MedicoModel> medicoBuscado = medicoRepository.findById(dto.medico_id());
 
-        // Se vier o médico, salva o registro
-        if (medicoBuscado.isPresent()) {
-            AgendaModel agendaModel = new AgendaModel();
-            agendaModel.setData(dto.dataAgenda());
-            agendaModel.setHoraInicio(dto.horaInicio());
-            agendaModel.setHoraFim(dto.horaFim());
-            agendaModel.setDisponivel(dto.disponivel());
-            agendaModel.setStatusAgenda(dto.statusAgenda());
-            agendaModel.setMedico(medicoBuscado.get());
-            medicoRepository.save(agendaModel.getMedico());
-            return ResponseEntity.status(201).body(entityToDto(agendaModel));
+        if (medicoBuscado.isEmpty()) {
+            return ResponseEntity.status(404).build();
         }
 
-        // Dê uma devolutiva caso o médico não exista
-        return ResponseEntity.status(404).build();
+        AgendaModel agendaModel = dtoToEntity(dto);
+        agendaModel.setMedico(medicoBuscado.get());
+
+        AgendaModel agendaSalva = agendaRepository.save(agendaModel);
+
+        return ResponseEntity.status(201).body(entityToDto(agendaSalva));
     }
 }
