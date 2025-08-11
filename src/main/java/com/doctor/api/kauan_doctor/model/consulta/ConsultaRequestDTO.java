@@ -1,11 +1,10 @@
 package com.doctor.api.kauan_doctor.model.consulta;
 
-public record ConsultaResponseDTO(
-        Long id,
+public record ConsultaRequestDTO(
         Long medico_id,
         Long paciente_id,
         Long agenda_id,
-        String observacoes,
+        String observacao,
         StatusConsultaEnum status
 ) {
 }
