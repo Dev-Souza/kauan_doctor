@@ -1,0 +1,89 @@
+package com.doctor.api.kauan_doctor.service;
+
+import com.doctor.api.kauan_doctor.model.agenda.AgendaModel;
+import com.doctor.api.kauan_doctor.model.consulta.ConsultaModel;
+import com.doctor.api.kauan_doctor.model.consulta.ConsultaRequestDTO;
+import com.doctor.api.kauan_doctor.model.consulta.ConsultaResponseDTO;
+import com.doctor.api.kauan_doctor.model.medico.MedicoModel;
+import com.doctor.api.kauan_doctor.model.paciente.PacienteModel;
+import com.doctor.api.kauan_doctor.repository.AgendaRepository;
+import com.doctor.api.kauan_doctor.repository.ConsultaRepository;
+import com.doctor.api.kauan_doctor.repository.MedicoRepository;
+import com.doctor.api.kauan_doctor.repository.PacienteRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class ConsultaService {
+    @Autowired
+    private ConsultaRepository consultaRepository;
+    @Autowired
+    private MedicoRepository medicoRepository;
+    @Autowired
+    private AgendaRepository agendaRepository;
+    @Autowired
+    private PacienteRepository pacienteRepository;
+
+    // Conversor: DTO to Entity
+    private ConsultaModel dtoEntity(ConsultaRequestDTO dto) {
+        ConsultaModel consulta = new ConsultaModel();
+
+        // GET Médico
+        Optional<MedicoModel> medicoBuscado = medicoRepository.findById(dto.medico_id());
+        medicoBuscado.ifPresent(consulta::setMedico);
+
+        // GET Paciente
+        Optional<PacienteModel> pacienteBuscado = pacienteRepository.findById(dto.paciente_id());
+        pacienteBuscado.ifPresent(consulta::setPaciente);
+
+        // GET Agenda
+        Optional<AgendaModel> agendaBuscado = agendaRepository.findById(dto.agenda_id());
+        agendaBuscado.ifPresent(consulta::setAgenda);
+
+        // OS demais atributos
+        consulta.setObservacao(dto.observacao());
+        consulta.setStatus(dto.status());
+
+        return consulta;
+    }
+
+    // Conversor: Entity to DTO
+    private ConsultaResponseDTO entityToDTO(ConsultaModel consultaModel) {
+        return new ConsultaResponseDTO(
+                consultaModel.getId(),
+                consultaModel.getMedico().getId(),
+                consultaModel.getPaciente().getId(),
+                consultaModel.getAgenda().getId(),
+                consultaModel.getObservacao(),
+                consultaModel.getStatus()
+        );
+    }
+
+    // CREATE Consulta
+    public ResponseEntity<ConsultaResponseDTO> createConsulta(ConsultaRequestDTO dto) {
+        // GET Médico
+        Optional<MedicoModel> medicoBuscado = medicoRepository.findById(dto.medico_id());
+        // GET Paciente
+        Optional<PacienteModel> pacienteBuscado = pacienteRepository.findById(dto.paciente_id());
+        // GET Agenda
+        Optional<AgendaModel> agendaBuscado = agendaRepository.findById(dto.agenda_id());
+
+        if (medicoBuscado.isEmpty() || pacienteBuscado.isEmpty() || agendaBuscado.isEmpty()) {
+            return ResponseEntity.status(404).build();
+        }
+
+        // Setando os valores
+        ConsultaModel consultaModel = dtoEntity(dto);
+        consultaModel.setMedico(medicoBuscado.get());
+        consultaModel.setPaciente(pacienteBuscado.get());
+        consultaModel.setAgenda(agendaBuscado.get());
+        consultaModel.setObservacao(dto.observacao());
+        consultaModel.setStatus(dto.status());
+        // Salvando no banco
+        ConsultaModel consultaSalva = consultaRepository.save(consultaModel);
+        return ResponseEntity.status(201).body(entityToDTO(consultaSalva));
+    }
+}
