@@ -7,10 +7,13 @@ import com.doctor.api.kauan_doctor.model.medico.MedicoModel;
 import com.doctor.api.kauan_doctor.repository.AgendaRepository;
 import com.doctor.api.kauan_doctor.repository.MedicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AgendaService {
@@ -64,4 +67,22 @@ public class AgendaService {
 
         return ResponseEntity.status(201).body(entityToDto(agendaSalva));
     }
+
+    // VER DISPONIBILIDADE DA AGENDA DO MÉDICO
+    public ResponseEntity<List<AgendaResponseDTO>> findAllAgendasDeUmMedico(Long medico_id) {
+        // BUSCANDO O MÉDICO EXISTENTE
+        Optional<MedicoModel> medicoBuscado = medicoRepository.findById(medico_id);
+
+        // CASO EXISTA FAÇA AS OPERAÇÕES
+        if (medicoBuscado.isPresent()) {
+            // BUSCANDO A LISTA DE AGENDA DO MÉDICO
+            List<AgendaResponseDTO> listaAgendaDoMedico = agendaRepository.findAllAgenda(medico_id).stream()
+                    .map(this::entityToDto)
+                    .collect(Collectors.toList());
+        }
+
+        // CASO O MÉDICO NÃO FOR PRESENTE, RETORNE O ERRO
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
 }
