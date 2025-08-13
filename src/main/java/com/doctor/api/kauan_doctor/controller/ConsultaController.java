@@ -7,10 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/consultas")
@@ -24,4 +23,9 @@ public class ConsultaController {
     @PreAuthorize("hasRole('PACIENTE')")
     @PostMapping
     public ResponseEntity<ConsultaResponseDTO> createConsulta(@RequestBody ConsultaRequestDTO consultaRequestDTO) {return consultaService.createConsulta(consultaRequestDTO);}
+
+    //  PEGANDO CONSULTAS DE UM MÉDICO ESPECÍFICO
+    @PreAuthorize("hasRole('MEDICO')")
+    @GetMapping("medico/{medico_id}")
+    public ResponseEntity<List<ConsultaResponseDTO>> listaConsultas(@PathVariable("medico_id") Long medico_id) {return consultaService.listConsultasSpecificMedicoId(medico_id);}
 }
