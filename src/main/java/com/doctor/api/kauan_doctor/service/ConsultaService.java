@@ -4,6 +4,7 @@ import com.doctor.api.kauan_doctor.model.agenda.AgendaModel;
 import com.doctor.api.kauan_doctor.model.consulta.ConsultaModel;
 import com.doctor.api.kauan_doctor.model.consulta.ConsultaRequestDTO;
 import com.doctor.api.kauan_doctor.model.consulta.ConsultaResponseDTO;
+import com.doctor.api.kauan_doctor.model.consulta.StatusConsultaEnum;
 import com.doctor.api.kauan_doctor.model.medico.MedicoModel;
 import com.doctor.api.kauan_doctor.model.paciente.PacienteModel;
 import com.doctor.api.kauan_doctor.repository.AgendaRepository;
@@ -102,7 +103,24 @@ public class ConsultaService {
                     .collect(Collectors.toList());
             return ResponseEntity.status(200).body(listaConsultasDeUmMedico);
         }
-        // RETORNO NEGATIVO PARA CASO NÃO ENCONTRE ALGUM MÉDICO
+        // RETORNO NEGATIVO CASO NÃO ENCONTRE ALGUM MÉDICO
+        return ResponseEntity.status(404).build();
+    }
+
+    // GET HISTÓRICO DE CONSULTAS DE UM PACIENTE POR STATUS
+    public ResponseEntity<List<ConsultaResponseDTO>> listaHistoricoConsultasPacientePorStatus(Long paciente_id, StatusConsultaEnum statusConsulta){
+        // BUSCANDO SE O PACIENTE REALMENTE EXISTE
+        Optional<PacienteModel> pacienteBuscado = pacienteRepository.findById(paciente_id);
+
+        // SE O PACIENTE EXISTIR, PODE FAZER A OPERAÇÃO
+        if(pacienteBuscado.isPresent()) {
+            // TRAZENDO A LISTA DE CONSULTAS DE UM PACIENTE JÁ FILTRADA POR UM STATUS E CONVERTANDO PARA DTO
+            List<ConsultaResponseDTO> listaHistoricoConsultasPacientePorStatus = consultaRepository.consultasPacientePorStatus(paciente_id, statusConsulta).stream()
+                    .map(this::entityToDTO)
+                    .toList();
+            return ResponseEntity.status(200).body(listaHistoricoConsultasPacientePorStatus);
+        }
+        // RETORNO NEGATIVO CASO NÃO ENCONTRE ALGUM PACIENTE
         return ResponseEntity.status(404).build();
     }
 }
