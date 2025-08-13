@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ConsultaService {
@@ -85,5 +87,22 @@ public class ConsultaService {
         // Salvando no banco
         ConsultaModel consultaSalva = consultaRepository.save(consultaModel);
         return ResponseEntity.status(201).body(entityToDTO(consultaSalva));
+    }
+
+    // GET CONSULTAS TO A SPECIFIC MEDICO_ID
+    public ResponseEntity<List<ConsultaResponseDTO>> listConsultasSpecificMedicoId(Long medico_id) {
+        // BUSCANDO SE O MÉDICO REALMENTE EXISTE
+        Optional<MedicoModel> medicoBuscado = medicoRepository.findById(medico_id);
+
+        // SE O MÉDICO EXISTIR, PODE FAZER A OPERAÇÃO
+        if(medicoBuscado.isPresent()) {
+            // TRAZENDO A LISTA DE CONSULTAS DE UM MÉDICO E JÁ FAZENDO A CONVERSÃO PARA DTO
+            List<ConsultaResponseDTO> listaConsultasDeUmMedico = consultaRepository.listaConsultasDeUmMedico(medico_id).stream()
+                    .map(this::entityToDTO)
+                    .collect(Collectors.toList());
+            return ResponseEntity.status(200).body(listaConsultasDeUmMedico);
+        }
+        // RETORNO NEGATIVO PARA CASO NÃO ENCONTRE ALGUM MÉDICO
+        return ResponseEntity.status(404).build();
     }
 }
