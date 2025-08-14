@@ -34,4 +34,20 @@ public class ConsultaController {
     @PreAuthorize("hasRole('PACIENTE')")
     @GetMapping("pacinente/{paciente_id}/status/{status}")
     public ResponseEntity<List<ConsultaResponseDTO>> listaConsultasPacientePorStatus(@PathVariable("paciente_id") Long paciente_id, @PathVariable("status")StatusConsultaEnum status) {return consultaService.listaHistoricoConsultasPacientePorStatus(paciente_id, status);}
+
+    // GET ALL CONSULTAS
+    @GetMapping
+    public ResponseEntity<List<ConsultaResponseDTO>> getAllConsultas() {return consultaService.getAllConsultas();}
+
+    // GET CONSULTA BY ID
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultaResponseDTO> getConsultaById(@PathVariable("id") Long id) {return consultaService.getConsultaById(id);}
+
+    // UPDATE CONSULTA
+    @PutMapping("/{id}")
+    public ResponseEntity<ConsultaResponseDTO> updateConsulta(@PathVariable("id") Long id, @RequestBody ConsultaRequestDTO dto) {return consultaService.updateConsulta(id, dto);}
+
+    // DELETE CONSULTA
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ConsultaResponseDTO> deleteConsulta(@PathVariable("id") Long id) {return consultaService.deleteConsulta(id);}
 }
