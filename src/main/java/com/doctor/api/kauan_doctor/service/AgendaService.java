@@ -78,11 +78,72 @@ public class AgendaService {
             // BUSCANDO A LISTA DE AGENDA DO MÉDICO
             List<AgendaResponseDTO> listaAgendaDoMedico = agendaRepository.findAllAgenda(medico_id).stream()
                     .map(this::entityToDto)
-                    .collect(Collectors.toList());
+                    .toList();
         }
 
         // CASO O MÉDICO NÃO FOR PRESENTE, RETORNE O ERRO
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
+    // GET ALL AGENDA
+    public ResponseEntity<List<AgendaResponseDTO>> getllAgendas() {
+        List<AgendaResponseDTO> agendas = agendaRepository.findAll()
+                .stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.status(HttpStatus.OK).body(agendas);
+    }
+
+    // GET AGENDA BY ID
+    public ResponseEntity<AgendaResponseDTO> getAgendaById(Long id) {
+        // VERIFICA SE A AGENDA EXISTE
+        Optional<AgendaModel> agenda = agendaRepository.findById(id);
+
+        // CASO A AGENDA EXISTA, FAÇA A DEVOLUTIVA
+        // CASO NÃO EXISTA, ENTREGUE UM RETORNO NEGATIVO
+        return agenda.map(agendaModel -> ResponseEntity.status(200).body(entityToDto(agendaModel))).orElseGet(() -> ResponseEntity.status(404).build());
+    }
+
+    // UPDATE AGENDA
+    public ResponseEntity<AgendaResponseDTO> updateAgenda(Long id, AgendaRequestDTO dto) {
+        // VERIFICA SE A AGENDA EXISTE
+        Optional<AgendaModel> agenda = agendaRepository.findById(id);
+
+        // CASO EXISTA, FAÇA A OPERAÇÃO
+        if(agenda.isPresent()){
+            AgendaModel agendaModel = agenda.get();
+            agendaModel.setData(dto.dataAgenda());
+            agendaModel.setHoraInicio(dto.horaInicio());
+            agendaModel.setHoraFim(dto.horaFim());
+            agendaModel.setDisponivel(dto.disponivel());
+            agendaModel.setStatusAgenda(dto.statusAgenda());
+
+            //BUSCANDO O MÉDICO
+            Optional<MedicoModel> medico = medicoRepository.findById(dto.medico_id());
+
+            // CASO O MÉDICO EXISTA
+            if(medico.isPresent()){
+                agendaModel.setMedico(medico.get());
+            } else {
+                // MÉDICO NÃO EXISTENTE
+                return ResponseEntity.status(404).build();
+            }
+
+            AgendaModel agendaSalva = agendaRepository.save(agendaModel);
+            return ResponseEntity.status(200).body(entityToDto(agendaSalva));
+        }
+        // CASO A AGENDA NÃO EXISTA
+        return ResponseEntity.status(404).build();
+    }
+
+    // DELETE AGENDA
+    public ResponseEntity<AgendaResponseDTO> deleteAgenda(Long id) {
+        // VERIFICANDO SE A AGENDA EXISTE
+        if(agendaRepository.existsById(id)){
+            agendaRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+        // CASO NÃO EXISTA A AGENDA
+        return ResponseEntity.status(404).build();
+    }
 }
