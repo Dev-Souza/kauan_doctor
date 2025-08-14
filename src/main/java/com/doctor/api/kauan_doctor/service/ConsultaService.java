@@ -96,7 +96,7 @@ public class ConsultaService {
         Optional<MedicoModel> medicoBuscado = medicoRepository.findById(medico_id);
 
         // SE O MÉDICO EXISTIR, PODE FAZER A OPERAÇÃO
-        if(medicoBuscado.isPresent()) {
+        if (medicoBuscado.isPresent()) {
             // TRAZENDO A LISTA DE CONSULTAS DE UM MÉDICO E JÁ FAZENDO A CONVERSÃO PARA DTO
             List<ConsultaResponseDTO> listaConsultasDeUmMedico = consultaRepository.listaConsultasDeUmMedico(medico_id).stream()
                     .map(this::entityToDTO)
@@ -108,12 +108,12 @@ public class ConsultaService {
     }
 
     // GET HISTÓRICO DE CONSULTAS DE UM PACIENTE POR STATUS
-    public ResponseEntity<List<ConsultaResponseDTO>> listaHistoricoConsultasPacientePorStatus(Long paciente_id, StatusConsultaEnum statusConsulta){
+    public ResponseEntity<List<ConsultaResponseDTO>> listaHistoricoConsultasPacientePorStatus(Long paciente_id, StatusConsultaEnum statusConsulta) {
         // BUSCANDO SE O PACIENTE REALMENTE EXISTE
         Optional<PacienteModel> pacienteBuscado = pacienteRepository.findById(paciente_id);
 
         // SE O PACIENTE EXISTIR, PODE FAZER A OPERAÇÃO
-        if(pacienteBuscado.isPresent()) {
+        if (pacienteBuscado.isPresent()) {
             // TRAZENDO A LISTA DE CONSULTAS DE UM PACIENTE JÁ FILTRADA POR UM STATUS E CONVERTANDO PARA DTO
             List<ConsultaResponseDTO> listaHistoricoConsultasPacientePorStatus = consultaRepository.consultasPacientePorStatus(paciente_id, statusConsulta).stream()
                     .map(this::entityToDTO)
@@ -121,6 +121,55 @@ public class ConsultaService {
             return ResponseEntity.status(200).body(listaHistoricoConsultasPacientePorStatus);
         }
         // RETORNO NEGATIVO CASO NÃO ENCONTRE ALGUM PACIENTE
+        return ResponseEntity.status(404).build();
+    }
+
+    // GET ALL CONSULTAS
+    public ResponseEntity<List<ConsultaResponseDTO>> getAllConsultas() {
+        List<ConsultaResponseDTO> consultas = consultaRepository.findAll()
+                .stream()
+                .map(this::entityToDTO)
+                .collect(Collectors.toList());
+        return ResponseEntity.status(200).body(consultas);
+    }
+
+    // GET CONSULTA BY ID
+    public ResponseEntity<ConsultaResponseDTO> getConsultaById(Long id) {
+        Optional<ConsultaModel> consultaBuscado = consultaRepository.findById(id);
+        return consultaBuscado
+                .map(item -> ResponseEntity.status(200).body(entityToDTO(item)))
+                .orElse(ResponseEntity.status(404).build());
+    }
+
+    // UPDATE CONSULTA
+    public ResponseEntity<ConsultaResponseDTO> updateConsulta(Long id, ConsultaRequestDTO dto) {
+
+        // VERIFICANDO SE A CONSULTA EXISTE
+        Optional<ConsultaModel> consultaBuscado = consultaRepository.findById(id);
+
+        // SE REALMENTE EXISTIR, FAÇA A OPERAÇÃO
+        if (consultaBuscado.isPresent()) {
+            ConsultaModel consultaModel = consultaBuscado.get();
+            consultaModel.setMedico(medicoRepository.findById(dto.medico_id()).get());
+            consultaModel.setAgenda(agendaRepository.findById(dto.agenda_id()).get());
+            consultaModel.setObservacao(dto.observacao());
+            consultaModel.setStatus(dto.status());
+            consultaRepository.save(consultaModel);
+            return ResponseEntity.status(201).body(entityToDTO(consultaModel));
+        }
+
+        // CASO NÃO EXISTA A CONSULTA
+        return ResponseEntity.status(404).build();
+    }
+
+    // DELETE CONSULTA
+    public ResponseEntity<ConsultaResponseDTO> deleteConsulta(Long id) {
+        if (consultaRepository.existsById(id)) {
+            consultaRepository.deleteById(id);
+            return ResponseEntity.noContent().build();
+        }
+
+        // CASO A CONSULTA NÃO EXISTA
         return ResponseEntity.status(404).build();
     }
 }
