@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface AgendaRepository extends JpaRepository<AgendaModel, Long> {
 
-    @Query(value = "SELECT * FROM agenda WHERE medico_id = :medico_id", nativeQuery = true)
+    @Query(value = "SELECT * FROM agenda WHERE medico_id = :medico_id AND status = 'LIVRE'", nativeQuery = true)
     List<AgendaModel> findAllAgenda(@Param("medico_id") Long medico_id);
 }
