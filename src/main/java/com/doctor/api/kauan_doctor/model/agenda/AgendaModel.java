@@ -24,7 +24,7 @@ public class AgendaModel {
     private boolean disponivel = true;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "statusagenda", nullable = false)
+    @Column(name = "status_agenda", nullable = true)
     private StatusAgendaEnum statusAgenda; // LIVRE, RESERVADA, CANCELADA...
 
     @ManyToOne
