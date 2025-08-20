@@ -79,6 +79,7 @@ public class AgendaService {
             List<AgendaResponseDTO> listaAgendaDoMedico = agendaRepository.findAllAgenda(medico_id).stream()
                     .map(this::entityToDto)
                     .toList();
+            return ResponseEntity.status(200).body(listaAgendaDoMedico);
         }
 
         // CASO O MÉDICO NÃO FOR PRESENTE, RETORNE O ERRO
