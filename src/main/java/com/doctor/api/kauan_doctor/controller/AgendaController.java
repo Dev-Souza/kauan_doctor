@@ -25,7 +25,6 @@ public class AgendaController {
     public ResponseEntity<AgendaResponseDTO> createAgenda (@RequestBody AgendaRequestDTO agendaRequestDTO) {return agendaService.createAgenda(agendaRequestDTO);}
 
     // VER DISPONIBILIDADE DA AGENDA DE UM MÉDICO
-    @PreAuthorize("hasRole('MEDICO')")
     @GetMapping("diponibilidade/medico/{medico_id}")
     public ResponseEntity<List<AgendaResponseDTO>> listaDeAgendaDisponivel(@PathVariable("medico_id") Long medico_id){return agendaService.findAllAgendasDeUmMedico(medico_id);}
 
