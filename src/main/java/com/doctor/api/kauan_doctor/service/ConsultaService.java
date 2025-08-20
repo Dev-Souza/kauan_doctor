@@ -78,11 +78,15 @@ public class ConsultaService {
             return ResponseEntity.status(404).build();
         }
 
+        // ALTERANDO O STATUS DA AGENDA PARA RESERVADA
+        AgendaModel agendaAlterada = agendaRepository.updateStatusAgenda(agendaBuscado.get().getId());
+
         // Setando os valores
         ConsultaModel consultaModel = dtoEntity(dto);
         consultaModel.setMedico(medicoBuscado.get());
         consultaModel.setPaciente(pacienteBuscado.get());
-        consultaModel.setAgenda(agendaBuscado.get());
+        // Colocando a agenda alterada
+        consultaModel.setAgenda(agendaAlterada);
         consultaModel.setObservacao(dto.observacao());
         consultaModel.setStatus(dto.status());
         // Salvando no banco
