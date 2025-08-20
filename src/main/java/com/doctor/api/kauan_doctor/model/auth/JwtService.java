@@ -1,5 +1,6 @@
 package com.doctor.api.kauan_doctor.model.auth;
 
+import com.doctor.api.kauan_doctor.infra.security.UserSecurity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -18,10 +19,10 @@ public class JwtService {
     @Value("${api.security.token.secret}")
     private String SECRET_KEY;
 
-    public String gerarToken(UserDetails user) {
+    public String gerarToken(UserSecurity user) {
         return Jwts.builder()
                 .subject(user.getUsername())
-                .claim("role", user.getAuthorities().iterator().next().getAuthority())
+                .claim("role", user.getRole())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 8))
                 .signWith(getChaveDeAssinatura())

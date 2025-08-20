@@ -1,5 +1,6 @@
 package com.doctor.api.kauan_doctor.service;
 
+import com.doctor.api.kauan_doctor.infra.security.UserSecurity;
 import com.doctor.api.kauan_doctor.model.medico.MedicoModel;
 import com.doctor.api.kauan_doctor.model.paciente.PacienteModel;
 import com.doctor.api.kauan_doctor.repository.MedicoRepository;
@@ -26,21 +27,23 @@ public class CustomUserDetailsService implements UserDetailsService {
         // Tenta encontrar um médico pelo email
         MedicoModel medico = medicoRepository.findByEmail(email).orElse(null);
         if (medico != null) {
-            return User.builder()
-                    .username(medico.getEmail())
-                    .password(medico.getSenha())
-                    .roles(medico.getRole().name().replace("ROLE_", ""))
-                    .build();
+            return new UserSecurity(
+                    medico.getId(),
+                    medico.getEmail(),
+                    medico.getSenha(),
+                    medico.getRole().name()
+            );
         }
 
         // Tenta encontrar um paciente pelo email
         PacienteModel paciente = pacienteRepository.findByEmail(email).orElse(null);
         if (paciente != null) {
-            return User.builder()
-                    .username(paciente.getEmail())
-                    .password(paciente.getSenha())
-                    .roles(paciente.getRole().name().replace("ROLE_", ""))
-                    .build();
+            return new UserSecurity(
+                    paciente.getId(),
+                    paciente.getEmail(),
+                    paciente.getSenha(),
+                    paciente.getRole().name()
+            );
         }
 
         // Se não encontrar nenhum

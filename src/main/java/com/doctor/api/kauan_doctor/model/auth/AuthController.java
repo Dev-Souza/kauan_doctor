@@ -1,5 +1,6 @@
 package com.doctor.api.kauan_doctor.model.auth;
 
+import com.doctor.api.kauan_doctor.infra.security.UserSecurity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,13 +32,14 @@ public class AuthController {
 
         // 3. Extrai o UserDetails do objeto Authentication que foi retornado
         // Este é o usuário que foi autenticado com sucesso
-        var user = (UserDetails) authentication.getPrincipal();
+        var user = (UserSecurity) authentication.getPrincipal();
 
         // 4. Gera o token JWT e extrai a role
         String token = jwtService.gerarToken(user);
-        String role = user.getAuthorities().iterator().next().getAuthority();
+        String role = user.getRole();
+        Long idLogado = user.getId();
 
         // 5. Retorna a resposta com o token e a role
-        return ResponseEntity.ok(new LoginResponseDTO(token, role));
+        return ResponseEntity.ok(new LoginResponseDTO(token, role, idLogado));
     }
 }
